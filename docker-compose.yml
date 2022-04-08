@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  duckdb_fdw0:
+     build: .
+     ports:
+         - "5449:5432"
+     volumes:
+         - mdata:/var/lib/postgresql/data
+     environment:
+         - POSTGRES_USER=postgres
+         - POSTGRES_DB=postgres
+         
+volumes:
+  mdata:

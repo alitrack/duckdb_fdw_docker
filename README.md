@@ -1,2 +1,3 @@
 # duckdb_fdw_docker
-Docker Compose for DuckDB FDW Compiling
+
+Docker Compose for DuckDB FDW Compiling.
