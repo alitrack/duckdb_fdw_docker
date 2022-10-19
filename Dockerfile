@@ -9,7 +9,7 @@ RUN git clone https://github.com/cwida/duckdb.git \
   && cd duckdb \
   && make
 
-RUN apt-get install -y postgresql-server-dev-14 postgresql-client-14
+RUN apt-get install -y postgresql-server-dev-15 postgresql-client-15
 
 RUN git clone https://github.com/alitrack/duckdb_fdw.git  \
    && cd duckdb_fdw \
@@ -20,3 +20,5 @@ RUN git clone https://github.com/alitrack/duckdb_fdw.git  \
    && make install USE_PGXS=1
 
 ENV POSTGRES_HOST_AUTH_METHOD='trust'
+USER postgres
+RUN  /duckdb/build/release/duckdb -unsigned -c "install '/duckdb/build/release/extension/parquet/parquet.duckdb_extension'"
