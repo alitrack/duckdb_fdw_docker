@@ -5,10 +5,6 @@ RUN apt-get update && apt-get install -y \
   build-essential \
   cmake
 
-RUN git clone https://github.com/cwida/duckdb.git \
-  && cd duckdb \
-  && make
-
 RUN apt-get install -y postgresql-server-dev-15 postgresql-client-15 wget unzip
 
 RUN git clone -b pg15 https://github.com/alitrack/duckdb_fdw.git  \
@@ -21,4 +17,3 @@ RUN git clone -b pg15 https://github.com/alitrack/duckdb_fdw.git  \
 
 ENV POSTGRES_HOST_AUTH_METHOD='trust'
 USER postgres
-RUN  /duckdb/build/release/duckdb -unsigned -c "install '/duckdb/build/release/extension/parquet/parquet.duckdb_extension'"
