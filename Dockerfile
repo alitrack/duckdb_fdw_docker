@@ -1,15 +1,19 @@
-FROM postgres
+ARG POSTGRES_VERSION=16
+FROM postgres:${POSTGRES_VERSION}
+
+ENV POSTGRES_VERSION=16
+ENV DUCKDB_VERSION=0.9.2
 
 RUN apt-get update && apt-get install -y \
   git \
   build-essential \
   cmake
 
-RUN apt-get install -y postgresql-server-dev-15 postgresql-client-15 wget unzip
+RUN apt-get install -y postgresql-server-dev-${POSTGRES_VERSION} postgresql-client-${POSTGRES_VERSION} wget unzip
 
-RUN git clone -b pg15 https://github.com/alitrack/duckdb_fdw.git  \
+RUN git clone -b pg${POSTGRES_VERSION} https://github.com/alitrack/duckdb_fdw.git  \
    && cd duckdb_fdw \
-   && wget -c https://github.com/duckdb/duckdb/releases/latest/download/libduckdb-linux-amd64.zip \
+   && wget -c https://github.com/duckdb/duckdb/releases/download/v${DUCKDB_VERSION}/libduckdb-linux-amd64.zip \
    && unzip -d . libduckdb-linux-amd64.zip \
    && cp libduckdb.so $(pg_config --libdir)  \
    && make USE_PGXS=1 \
