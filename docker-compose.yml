@@ -1,17 +1,29 @@
 version: "3.3"
 services:
-  duckdb_fdw0:
-     build: .
-     ports:
-         - "5449:5432"
-     volumes:
-         - mdata:/var/lib/postgresql/data
-     environment:
-         - POSTGRES_USER=postgres
-         - POSTGRES_DB=postgres
-         - POSTGRES_PASSWORD=qwert
-         - POSTGRES_VERSION=16    
-         - DUCKDB_VERSION=0.9.2    
-         
+    duckdb_fdw0:
+        build:
+            context: .
+            args:
+                - POSTGRES_VERSION=16
+                - DUCKDB_VERSION=0.9.2
+        ports:
+            - "5449:5432"
+        volumes:
+            - mdata:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=postgres
+            - POSTGRES_PASSWORD=qwert
+        # depends_on:
+        #     - mdata
+
 volumes:
-  mdata:
+    mdata: # Additional volume to mount the SQL script
+
+    initdb-scripts:
+        driver: local
+
+networks:
+    default:
+        external:
+            name: my_network
