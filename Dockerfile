@@ -19,8 +19,9 @@ RUN apt-get update && apt-get install -y \
 # Clone duckdb_fdw repository and build
 RUN git clone  https://github.com/alitrack/duckdb_fdw.git \
    && cd duckdb_fdw \
-   && wget -c https://github.com/duckdb/duckdb/releases/download/v${DUCKDB_VERSION}/libduckdb-linux-amd64.zip \
-   && unzip -o -d . libduckdb-linux-amd64.zip \
+   && export DUCK_ARCH=$(uname -m | sed -e s/arm64/aarch64/ | sed -e s/x86_64/amd64/) \
+   && wget -c https://github.com/duckdb/duckdb/releases/download/v${DUCKDB_VERSION}/libduckdb-linux-${DUCK_ARCH}.zip \
+   && unzip -o -d . libduckdb-linux-${DUCK_ARCH}.zip \
    && cp libduckdb.so $(pg_config --libdir) \
    && make USE_PGXS=1 \
    && make install USE_PGXS=1
@@ -37,8 +38,13 @@ USER postgres
 # Create the final image
 FROM postgres:${POSTGRES_VERSION}
 ARG POSTGRES_VERSION=16
+
 # Copy duckdb_fdw artifacts from the builder stage
 COPY --from=builder duckdb_fdw/duckdb_fdw.so /usr/lib/postgresql/${POSTGRES_VERSION}/lib/
 COPY --from=builder duckdb_fdw/duckdb_fdw.control /usr/share/postgresql/${POSTGRES_VERSION}/extension/
 COPY --from=builder duckdb_fdw/duckdb_fdw*.sql /usr/share/postgresql/${POSTGRES_VERSION}/extension/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libduckdb.so /usr/lib/x86_64-linux-gnu/
+
+# Horrible workaround for Docker's completely brain damaged multiplatform builds
+RUN mkdir /usr/lib/platform
+COPY --from=builder /usr/lib/*-linux-gnu/libduckdb.so /usr/lib/platform/
+RUN ln -sf /usr/lib/platform/libduckdb.so /usr/lib/$(uname -m | sed -e s/arm64/aarch64/)-linux-gnu/libduckdb.so
